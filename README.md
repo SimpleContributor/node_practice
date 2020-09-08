@@ -1,2 +1,8 @@
 # node_practice
-Learning node in depth
+Uploading my practice for a Node Udemy course taught by Andrew Mead. <br />
+What will be covered in this course:
+* Node
+* Express
+* MongoDB
+* RestAPIs
+* Heroku Deployment
