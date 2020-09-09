@@ -39,16 +39,6 @@ app.get('/help', (req, res) => {
     })
 })
 
-app.get('/help', (req, res) => {
-    res.send({
-        name: 'Caleb',
-        age: 26
-    });
-})
-
-app.get('/about', (req, res) => {
-    res.send('<h1>About Page</h1>');
-})
 
 app.get('/weather', (req, res) => {
     res.send({
@@ -56,6 +46,25 @@ app.get('/weather', (req, res) => {
         forecast: 'Looks sunny from here!'
     });
 })
+
+app.get('/help/*', (req, res) => {
+    res.render('error404', {
+        errorText: 'Help article not found',
+        name: 'Cleebith',
+        title: 'ERROR 404 Page, help extension '
+    })
+})
+
+
+// ERROR 404 Page
+app.get('*', (req, res) => {
+    res.render('error404', {
+        errorText: 'Page not found',
+        name: 'Cleebith',
+        title: 'ERROR 404 Page'
+    })
+})
+
 
 app.listen(3000, () => {
     console.log('Server is up on Port 3000.');
