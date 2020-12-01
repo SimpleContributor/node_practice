@@ -6,6 +6,33 @@ const taskRouter = require('./routers/task');
 const app = express();
 const port = process.env.PORT || 3000;
 
+
+const multer = require('multer');
+const upload = multer({
+    dest: 'images',
+    limits: {
+        fileSize: 1000000 // 1MB megabyte
+    },
+    fileFilter(req, file, cb) {
+        if (!file.originalname.match(/\.(doc|docx)$/)) {
+            return cb(new Error('Please upload a Word Document'))
+        }
+
+        cb(undefined, true)
+
+        // cb(new Error('File must be a PDF'))
+        // cb(undefined, true)
+    }
+});
+
+app.post('/upload', upload.single('upload'), (req, res) => {
+    res.send()
+}, (error, req, res, next) => {
+    res.status(400).send({ error: error.message })
+})
+
+
+
 app.use(express.json());
 app.use(userRouter);
 app.use(taskRouter);
@@ -15,19 +42,3 @@ app.listen(port, () => {
 });
 
 
-
-// const bcrypt = require('bcryptjs');
-
-// const myFunction = async () => {
-//     const password = 'Red12345!';
-
-//     const hashedpassword = await bcrypt.hash(password, 8);
-
-//     console.log(password);
-//     console.log(hashedpassword);
-
-//     const isMatch = await bcrypt.compare('Red12345', hashedpassword);
-//     console.log(isMatch);
-// }
-
-// myFunction();

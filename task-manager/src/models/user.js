@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const Task = require('./task')
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -40,8 +42,49 @@ const userSchema = new mongoose.Schema({
                 throw new Error('Invalid password.')
             }
         }
-    }
+    },
+
+    tokens: [{
+        token: {
+            type: String,
+            required: true
+        }
+    }]
+}, {
+    timestamps: true,
 })
+
+
+userSchema.virtual('tasks', {
+    ref: 'Task',
+    localField: '_id',
+    foreignField: 'owner'
+})
+
+
+// remove the password and tokens when user looks at their own data
+// when the router sends a user as a response this toJSON function gets called automatically
+userSchema.methods.toJSON = function() {
+    const user = this;
+    const userObject = user.toObject();
+
+    delete userObject.password;
+    delete userObject.tokens;
+
+    return userObject;
+}
+
+
+userSchema.methods.generateAuthToken = async function() {
+    const user = this;
+    const token = jwt.sign({ _id: user._id.toString() }, 'thisismynewcourse');
+
+    user.tokens = user.tokens.concat({ token })
+    await user.save();
+
+    return token;
+}
+
 
 userSchema.statics.findByCredentials = async (email, password) => {
     const user = await User.findOne({ email })
@@ -68,6 +111,15 @@ userSchema.pre('save', async function (next) {
     }
 
     next()
+})
+
+// Delete user tasks when user is deleted
+userSchema.pre('remove', async function (next) {
+    const user = this;
+
+    await Task.deleteMany({ owner: user._id })
+
+    next();
 })
 
 const User = mongoose.model('User', userSchema);
